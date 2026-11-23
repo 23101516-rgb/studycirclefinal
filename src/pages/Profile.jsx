@@ -5,7 +5,7 @@ import { useStore } from '../store'
 import { COURSES, GOALS, SCHOOLS } from '../data/seed'
 import { AvailabilityGrid, Avatar } from '../components/ui'
 import { normCourse, validCourse } from '../lib/match'
-const YEARS = ['1st year', '2nd year', '3rd year', '4th year', 'Graduate']
+const YEARS = ['1st year', '2nd year', '3rd year', '4th year', 'Graduate', 'Other', 'Prefer not to say']
 const MAX_COURSES = 12
 export default function Profile() {
   const { state, dispatch } = useStore()

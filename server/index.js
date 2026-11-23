@@ -30,7 +30,7 @@ const COURSES = [
   { code: 'ENG 1101', name: 'Academic Writing' },
 ]
 const GOALS = ['Ace the exams', 'Keep up with lectures', 'Project work', 'Deep understanding']
-const YEARS = ['1st year', '2nd year', '3rd year', '4th year', 'Graduate']
+const YEARS = ['1st year', '2nd year', '3rd year', '4th year', 'Graduate', 'Other', 'Prefer not to say']
 const SLOT = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)-(Mor|Aft|Eve)$/
 const MAX_COURSES = 12
 seedIfEmpty()
