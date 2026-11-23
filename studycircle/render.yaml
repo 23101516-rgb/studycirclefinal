@@ -1,0 +1,24 @@
+# Render Blueprint: one web service that runs the API and serves the built React app.
+# Deploy: Render dashboard -> New -> Blueprint -> pick this GitHub repo.
+services:
+  - type: web
+    name: studycircle
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: TRUST_PROXY
+        value: "1"
+      - key: JWT_SECRET
+        generateValue: true          # random secret so logins stay valid across restarts
+    # The free plan has no persistent disk, so the database resets to the sample data when the
+    # service restarts. On a paid plan, uncomment this to keep accounts, chats and files:
+    # disk:
+    #   name: studycircle-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+    # (and add an env var  DATA_DIR = /var/data)
