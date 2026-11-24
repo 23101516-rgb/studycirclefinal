@@ -7,6 +7,8 @@ import {
   Send,
   Plus,
   Trash2,
+  Reply,
+  X,
   Download,
   UploadCloud,
   ExternalLink,
@@ -172,16 +174,36 @@ function Chat({ g, who }) {
   const { state, dispatch } = useStore()
   const msgs = state.messages[g.id] || []
   const [text, setText] = useState('')
+  const [replyTo, setReplyTo] = useState(null)
   const end = useRef(null)
+  const input = useRef(null)
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' })
   }, [msgs.length])
+  const jumpTo = (id) => {
+    const el = document.getElementById(`msg-${id}`)
+    if (!el) return
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    el.classList.add('flash')
+    setTimeout(() => el.classList.remove('flash'), 1200)
+  }
+  const startReply = (m, name) => {
+    setReplyTo({ id: m.id, name, text: m.text.length > 140 ? m.text.slice(0, 140) + '\u2026' : m.text })
+    input.current?.focus()
+  }
   const send = async (e) => {
     e.preventDefault()
     const t = text.trim()
     if (!t) return
+    const r = replyTo
     setText('')
-    if (!(await dispatch({ type: 'message', groupId: g.id, message: { text: t } }))) setText(t)
+    setReplyTo(null)
+    if (
+      !(await dispatch({ type: 'message', groupId: g.id, message: { text: t, replyTo: r ? r.id : null } }))
+    ) {
+      setText(t)
+      setReplyTo(r)
+    }
   }
   return (
     <div className="chat">
@@ -195,13 +217,32 @@ function Chat({ g, who }) {
           const p = { ...who(m.by), name: m.name || who(m.by).name }
           const mine = m.by === 'me'
           return (
-            <div key={m.id} className={`msg ${mine ? 'mine' : ''}`}>
+            <div key={m.id} id={`msg-${m.id}`} className={`msg ${mine ? 'mine' : ''}`}>
               {!mine && <Avatar name={p.name} size={30} />}
               <div className="bubble">
                 {!mine && <b>{p.name.split(' ')[0]}</b>}
+                {m.replyTo &&
+                  (m.replyTo.id ? (
+                    <button type="button" className="quote" onClick={() => jumpTo(m.replyTo.id)}>
+                      <b>{m.replyTo.name.split(' ')[0]}</b>
+                      <span>{m.replyTo.text}</span>
+                    </button>
+                  ) : (
+                    <div className="quote gone">
+                      <span>Original message was deleted</span>
+                    </div>
+                  ))}
                 <p>{m.text}</p>
                 <small>
                   {fmtAgo(m.at)}
+                  <button
+                    className="msg-del"
+                    aria-label="Reply"
+                    title="Reply"
+                    onClick={() => startReply(m, p.name)}
+                  >
+                    <Reply size={12} />
+                  </button>
                   {mine && (
                     <button
                       className="msg-del"
@@ -221,8 +262,25 @@ function Chat({ g, who }) {
         })}
         <div ref={end} />
       </div>
+      {replyTo && (
+        <div className="replying">
+          <Reply size={14} />
+          <span>
+            Replying to <b>{replyTo.name.split(' ')[0]}</b>: {replyTo.text}
+          </span>
+          <button
+            type="button"
+            aria-label="Cancel reply"
+            title="Cancel reply"
+            onClick={() => setReplyTo(null)}
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
       <form className="composer" onSubmit={send}>
         <input
+          ref={input}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Message the group"

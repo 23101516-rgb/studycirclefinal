@@ -189,6 +189,17 @@ const cg = await call('POST', '/groups', {
   body: { name: 'Tree Huggers', course: 'CIS 2102', goal: 'Project work', avail: ['Mon-Eve'] },
 })
 ok(cg.s === 201 && cg.d.id, 'group created')
+const parent = (await call('GET', `/groups/${g1.id}/messages?after=0`, { token: A })).d.at(-1)
+const rep = await call('POST', `/groups/${g1.id}/messages`, {
+  token: Bt,
+  body: { text: 'reply test', replyTo: parent.id },
+})
+ok(rep.s === 201 && rep.d.replyTo && rep.d.replyTo.id === parent.id, 'reply to a message')
+ok(
+  (await call('POST', `/groups/${g1.id}/messages`, { token: Bt, body: { text: 'bad', replyTo: '999999' } }))
+    .s === 400,
+  'reply to missing message rejected',
+)
 const mm = (await call('GET', `/groups/${g1.id}/messages?after=0`, { token: Bt })).d.find(
   (m) => m.text === 'Hello from Bob',
 )

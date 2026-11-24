@@ -84,6 +84,14 @@ if (
 ) {
   db.exec("ALTER TABLE users ADD COLUMN course_names TEXT NOT NULL DEFAULT '{}'")
 }
+if (
+  !db
+    .prepare('PRAGMA table_info(messages)')
+    .all()
+    .some((c) => c.name === 'reply_to')
+) {
+  db.exec('ALTER TABLE messages ADD COLUMN reply_to INTEGER')
+}
 export const now = () => new Date().toISOString()
 export const j = (v) => {
   try {

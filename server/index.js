@@ -121,12 +121,24 @@ function serializeGroups(rows, viewer) {
     owner: g.created_by === viewer,
   }))
 }
+const replyOf = (m) => {
+  if (!m.reply_to) return null
+  const p = db
+    .prepare(
+      'SELECT m.id, m.text, u.name FROM messages m JOIN users u ON u.id=m.user_id WHERE m.id=? AND m.group_id=?',
+    )
+    .get(m.reply_to, m.group_id)
+  return p
+    ? { id: String(p.id), name: p.name, text: p.text.length > 140 ? p.text.slice(0, 140) + '\u2026' : p.text }
+    : { id: null, name: '', text: '' }
+}
 const serializeMessage = (m, viewer) => ({
   id: String(m.id),
   by: uidFor(viewer)(m.user_id),
   name: m.name,
   text: m.text,
   at: m.created_at,
+  replyTo: replyOf(m),
 })
 function serializeSessions(gids, viewer) {
   if (!gids.length) return []
@@ -443,9 +455,17 @@ api.post(
   wrap((req, res) => {
     const g = groupFor(req, { member: true })
     const text = str(req.body.text, 2e3, 'Message')
+    let replyTo = null
+    if (req.body.replyTo !== void 0 && req.body.replyTo !== null && req.body.replyTo !== '') {
+      const parent = db
+        .prepare('SELECT id FROM messages WHERE id=? AND group_id=?')
+        .get(Number(req.body.replyTo), g.id)
+      if (!parent) throw new HttpError(400, 'The message you are replying to no longer exists.')
+      replyTo = parent.id
+    }
     const id = db
-      .prepare('INSERT INTO messages (group_id,user_id,text,created_at) VALUES (?,?,?,?)')
-      .run(g.id, req.user.id, text, now()).lastInsertRowid
+      .prepare('INSERT INTO messages (group_id,user_id,text,created_at,reply_to) VALUES (?,?,?,?,?)')
+      .run(g.id, req.user.id, text, now(), replyTo).lastInsertRowid
     res
       .status(201)
       .json(

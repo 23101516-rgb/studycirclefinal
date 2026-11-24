@@ -1507,3 +1507,72 @@ legend {
 .link-btn:disabled {
   opacity: 0.5;
 }
+.quote {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-left: 3px solid var(--violet, #5b3fd9);
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.quote b {
+  display: block;
+  font-size: 0.75rem;
+}
+.quote span {
+  display: block;
+  opacity: 0.85;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+}
+.quote.gone {
+  cursor: default;
+  font-style: italic;
+  opacity: 0.7;
+}
+.msg.mine .quote {
+  background: rgba(255, 255, 255, 0.16);
+  border-left-color: #fff;
+}
+.msg.flash .bubble {
+  outline: 2px solid var(--violet, #5b3fd9);
+  outline-offset: 2px;
+  transition: outline-color 0.3s;
+}
+.replying {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  margin: 6px 0 0;
+  background: rgba(91, 63, 217, 0.08);
+  border-left: 3px solid var(--violet, #5b3fd9);
+  border-radius: 6px;
+  font-size: 0.82rem;
+}
+.replying span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.replying button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  color: inherit;
+}
+.msg.mine .quote b {
+  color: #fff;
+}
